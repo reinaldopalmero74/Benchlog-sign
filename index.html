@@ -5,25 +5,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Sign Estimate — BenchLog</title>
 <style>
-  :root { --navy: #0A1C38; --gold: #C9A227; --bg: #f4f5f7; --card: #ffffff; --text: #1a1a1a; --muted: #6b7280; }
+  :root { --navy: #0A1C38; --gold: #C9A227; --bg: #eef0f3; --card: #ffffff; --text: #101418; --muted: #5A6470; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); }
-  header { background: var(--navy); color: #fff; padding: 20px 16px; text-align: center; }
-  header h1 { margin: 0; font-size: 22px; letter-spacing: 1px; }
-  header h1 span { color: var(--gold); }
-  header p { margin: 6px 0 0; font-size: 13px; opacity: .8; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.45; }
+  /* Company header — mirrors the estimate PDF */
+  .pdf-header { background: var(--navy); padding: 22px 20px; }
+  .pdf-header table { width: 100%; max-width: 640px; margin: 0 auto; border-collapse: collapse; }
+  .pdf-header td { vertical-align: middle; }
+  .logo-cell { width: 76px; padding-right: 16px; }
+  .logo { max-width: 76px; max-height: 76px; border-radius: 8px; display: block; }
+  .brand { color: var(--gold); font-size: 22px; font-weight: 700; letter-spacing: 2px; }
+  .contact { color: #C6CEDB; font-size: 12px; margin-top: 3px; }
+  .doc-title { color: #ffffff; font-size: 15px; margin-top: 6px; }
   main { max-width: 640px; margin: 0 auto; padding: 16px; }
   .card { background: var(--card); border-radius: 12px; padding: 18px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
-  .card h2 { margin: 0 0 10px; font-size: 16px; color: var(--navy); border-bottom: 2px solid var(--gold); padding-bottom: 8px; }
-  .row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; }
-  .row .k { color: var(--muted); }
-  .row .v { font-weight: 600; text-align: right; }
-  table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  th { text-align: left; color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; padding: 8px 4px; border-bottom: 1px solid #e5e7eb; }
-  td { padding: 8px 4px; border-bottom: 1px solid #f0f0f0; }
-  td.num, th.num { text-align: right; }
-  tr.total td { font-weight: 700; border-bottom: none; font-size: 16px; color: var(--navy); }
-  .notes { font-size: 14px; white-space: pre-wrap; color: #374151; }
+  .meta { width: 100%; border-collapse: collapse; }
+  .meta td { padding: 3px 0; vertical-align: top; }
+  .meta .k { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .8px; }
+  .meta .v { font-size: 15px; font-weight: 700; color: var(--navy); }
+  .meta .right { text-align: right; }
+  .block { margin-top: 12px; }
+  .block-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 2px; }
+  .block-name { font-size: 16px; font-weight: 700; color: var(--navy); }
+  .block-sub { font-size: 13px; color: var(--text); }
+  .section-h { color: var(--navy); font-size: 13px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; border-bottom: 2px solid var(--gold); padding-bottom: 5px; margin: 0 0 10px; }
+  table.services { width: 100%; border-collapse: collapse; }
+  table.services th { background: var(--navy); color: #ffffff; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .8px; padding: 9px 12px; }
+  table.services th:first-child { border-radius: 6px 0 0 6px; }
+  table.services th:last-child { border-radius: 0 6px 6px 0; }
+  table.services th.amount, table.services td.amount { text-align: right; white-space: nowrap; }
+  table.services td { padding: 9px 12px; border-bottom: 1px solid #E3E7ED; font-size: 13px; }
+  table.services tr.total td { border-bottom: none; border-top: 2px solid var(--navy); font-weight: 700; font-size: 15px; color: var(--navy); padding-top: 11px; }
+  .notes { font-size: 13px; white-space: pre-wrap; }
+  .terms { margin: 6px 0 0; padding-left: 18px; font-size: 12.5px; color: #333; }
+  .terms li { margin-bottom: 5px; }
+  .accept-statement { font-size: 13px; margin: 14px 0 4px; }
   #pad-wrap { border: 2px dashed #cbd5e1; border-radius: 10px; background: #fafafa; touch-action: none; position: relative; }
   #pad { display: block; width: 100%; height: 220px; cursor: crosshair; }
   #pad-hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 14px; pointer-events: none; }
@@ -37,48 +53,70 @@
   .error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; padding: 14px; border-radius: 10px; font-size: 14px; }
   .success { text-align: center; padding: 32px 16px; }
   .success .check { font-size: 52px; }
-  .success h2 { color: var(--navy); border: none; }
+  .success h2 { color: var(--navy); }
   .hidden { display: none !important; }
   .loading { text-align: center; padding: 40px; color: var(--muted); }
-  .terms { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
 </style>
 </head>
 <body>
-<header>
-  <h1>BENCH<span>LOG</span></h1>
-  <p>Electronic estimate signature</p>
-</header>
+<div class="pdf-header" id="pdf-header" style="display:none">
+  <table><tr>
+    <td class="logo-cell" id="logo-cell" style="display:none"><img class="logo" id="co-logo" alt="Company logo"></td>
+    <td>
+      <div class="brand" id="co-name">BenchLog</div>
+      <div id="co-contact"></div>
+      <div class="doc-title">Watch Repair Estimate</div>
+    </td>
+  </tr></table>
+</div>
 <main>
   <div id="loading" class="loading">Loading estimate…</div>
   <div id="error-box" class="card hidden"><div class="error" id="error-msg"></div></div>
 
   <div id="sign-view" class="hidden">
     <div class="card">
-      <h2>Estimate details</h2>
-      <div class="row"><span class="k">Estimate</span><span class="v" id="f-number"></span></div>
-      <div class="row"><span class="k">Watch</span><span class="v" id="f-watch"></span></div>
-      <div class="row" id="row-ref" style="display:none"><span class="k">Reference</span><span class="v" id="f-ref"></span></div>
-      <div class="row"><span class="k">Client</span><span class="v" id="f-client"></span></div>
-      <div class="row"><span class="k">From</span><span class="v" id="f-watchmaker"></span></div>
+      <table class="meta"><tr>
+        <td><div class="k">Estimate</div><div class="v" id="f-number"></div></td>
+        <td class="right"><div class="k">Date</div><div class="v" id="f-date"></div></td>
+      </tr></table>
+      <div class="block" id="client-block" style="display:none">
+        <div class="block-label">Bill to</div>
+        <div class="block-name" id="f-client"></div>
+      </div>
+      <div class="block">
+        <div class="block-label">Watch</div>
+        <div class="block-name" id="f-watch"></div>
+        <div class="block-sub" id="f-ref" style="display:none"></div>
+      </div>
     </div>
 
     <div class="card">
-      <h2>Services</h2>
-      <table>
-        <thead><tr><th>Description</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Amount</th></tr></thead>
+      <div class="section-h">Services</div>
+      <table class="services">
+        <thead><tr><th>Description</th><th class="amount">Amount</th></tr></thead>
         <tbody id="lines"></tbody>
       </table>
     </div>
 
     <div class="card" id="notes-card" style="display:none">
-      <h2>Notes</h2>
+      <div class="section-h">Notes</div>
       <div class="notes" id="f-notes"></div>
     </div>
 
     <div class="card">
-      <h2>Sign to accept</h2>
-      <label for="signer-name">Your full name</label>
-      <input type="text" id="signer-name" placeholder="Type your full name" autocomplete="name">
+      <div class="section-h">Acceptance</div>
+      <div class="block-label">Terms</div>
+      <ul class="terms">
+        <li>This estimate is valid for 30 days from the date issued.</li>
+        <li>Any additional work found necessary during the repair will be communicated and approved before proceeding.</li>
+        <li>Payment is due upon completion of the repair, unless otherwise agreed.</li>
+        <li>Parts availability and repair timelines may vary; the watchmaker will keep the client informed of any changes.</li>
+      </ul>
+      <p class="accept-statement">I accept the services and prices listed in this estimate and authorize the repair work described above.</p>
+      <div style="margin-top:14px">
+        <label for="signer-name">Your full name</label>
+        <input type="text" id="signer-name" placeholder="Type your full name" autocomplete="name">
+      </div>
       <div style="margin-top:12px"><label>Signature (draw with your finger)</label></div>
       <div id="pad-wrap" style="margin-top:6px">
         <canvas id="pad"></canvas>
@@ -87,7 +125,6 @@
       <button class="btn btn-ghost" id="clear-btn" type="button">Clear signature</button>
       <button class="btn btn-gold" id="submit-btn" type="button">Sign &amp; Accept Estimate</button>
       <div class="error hidden" id="submit-error" style="margin-top:10px"></div>
-      <p class="terms">By signing, you accept this estimate and authorize the work described above at the total price shown.</p>
     </div>
   </div>
 
@@ -132,6 +169,33 @@ function money(n) {
   return isNaN(v) ? "$0.00" : "$" + v.toFixed(2);
 }
 
+function fmtDate(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d)) return "";
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+function renderHeader(company) {
+  const c = company || {};
+  const brandName = c.company_name || c.your_name || "BenchLog";
+  document.getElementById("co-name").textContent = brandName;
+  document.title = "Sign Estimate — " + brandName;
+  const contact = document.getElementById("co-contact");
+  contact.innerHTML = "";
+  [c.phone, c.email, c.address].filter(Boolean).forEach((line) => {
+    const d = document.createElement("div");
+    d.className = "contact";
+    d.textContent = line;
+    contact.appendChild(d);
+  });
+  if (c.logo_data_uri) {
+    document.getElementById("logo-cell").style.display = "table-cell";
+    document.getElementById("co-logo").src = c.logo_data_uri;
+  }
+  document.getElementById("pdf-header").style.display = "block";
+}
+
 async function init() {
   if (!token) { showError("This signing link is invalid (missing code)."); return; }
   let data;
@@ -139,6 +203,7 @@ async function init() {
   catch (e) { showError("Could not load the estimate. Please check your connection and try again."); return; }
   if (!data.ok) { showError("This signing link is invalid or has expired."); return; }
   document.getElementById("loading").classList.add("hidden");
+  renderHeader(data.estimate.company);
   if (data.already_signed) {
     document.getElementById("done-view").classList.remove("hidden");
     document.getElementById("done-msg").textContent =
@@ -147,28 +212,34 @@ async function init() {
   }
   const e = data.estimate;
   document.getElementById("f-number").textContent = e.number || "";
+  document.getElementById("f-date").textContent = fmtDate(e.created_at);
+  if (e.client_name) {
+    document.getElementById("client-block").style.display = "block";
+    document.getElementById("f-client").textContent = e.client_name;
+  }
   document.getElementById("f-watch").textContent = e.watch || "—";
-  if (e.reference) { document.getElementById("row-ref").style.display = "flex"; document.getElementById("f-ref").textContent = e.reference; }
-  document.getElementById("f-client").textContent = e.client_name || "—";
-  document.getElementById("f-watchmaker").textContent = e.watchmaker_name || "";
+  if (e.reference) {
+    const r = document.getElementById("f-ref");
+    r.style.display = "block";
+    r.textContent = e.reference;
+  }
   if (e.notes) { document.getElementById("notes-card").style.display = "block"; document.getElementById("f-notes").textContent = e.notes; }
 
   const tbody = document.getElementById("lines");
   let total = 0;
   (e.lines || []).forEach((l) => {
-    const qty = Number(l.quantity) || 0, price = Number(l.price) || 0;
+    // The app's lines carry no quantity — a missing qty means one unit.
+    const qty = l.quantity == null ? 1 : (Number(l.quantity) || 0), price = Number(l.price) || 0;
     const amt = qty * price; total += amt;
     const tr = document.createElement("tr");
-    tr.innerHTML = "<td></td><td class='num'></td><td class='num'></td><td class='num'></td>";
+    tr.innerHTML = "<td></td><td class='amount'></td>";
     tr.children[0].textContent = l.description || "";
-    tr.children[1].textContent = qty;
-    tr.children[2].textContent = money(price);
-    tr.children[3].textContent = money(amt);
+    tr.children[1].textContent = money(amt);
     tbody.appendChild(tr);
   });
   const tr = document.createElement("tr");
   tr.className = "total";
-  tr.innerHTML = "<td colspan='3'>Total</td><td class='num'></td>";
+  tr.innerHTML = "<td>Total</td><td class='amount'></td>";
   tr.children[1].textContent = money(total);
   tbody.appendChild(tr);
 
