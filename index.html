@@ -68,6 +68,28 @@
   .success { text-align: center; padding: 32px 16px; }
   .success .check { font-size: 52px; }
   .success h2 { color: var(--navy); }
+  .muted { color: var(--muted); font-size: 13px; }
+  /* Repair-status timeline (client portal) */
+  .timeline { margin-top: 8px; }
+  .step { display: flex; gap: 12px; padding-bottom: 16px; position: relative; }
+  .step:last-child { padding-bottom: 0; }
+  .step .rail { display: flex; flex-direction: column; align-items: center; }
+  .step .dot {
+    width: 26px; height: 26px; border-radius: 50%; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+  }
+  .step.done .dot { background: var(--navy); color: #ffffff; }
+  .step.current .dot { background: var(--gold); color: var(--navy); box-shadow: 0 0 0 4px rgba(201,162,39,.25); }
+  .step.todo .dot { border: 2px solid #CBD5E1; }
+  .step .rail::after { content: ""; width: 2px; flex: 1; min-height: 12px; background: #E3E7ED; margin-top: 4px; }
+  .step:last-child .rail::after { display: none; }
+  .step.done .rail::after { background: var(--navy); }
+  .step-label { font-size: 14px; font-weight: 600; color: var(--muted); padding-top: 3px; }
+  .step.done .step-label, .step.current .step-label { color: var(--navy); }
+  /* Shared repair photos */
+  .gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+  .gallery img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; background: #E9EDF2; display: block; }
   .hidden { display: none !important; }
   .loading { text-align: center; padding: 40px; color: var(--muted); }
 </style>
@@ -156,6 +178,19 @@
     </div>
   </div>
 
+  <div id="status-view" class="hidden">
+    <div class="card">
+      <div class="section-h">Repair status</div>
+      <div id="timeline-steps" class="timeline"></div>
+      <p id="status-note" class="muted hidden" style="margin:8px 0 0"></p>
+    </div>
+    <div class="card">
+      <div class="section-h">Repair photos</div>
+      <div id="photo-gallery" class="gallery"></div>
+      <p id="photos-empty" class="muted hidden" style="margin:8px 0 0">Photos shared by your watchmaker will appear here.</p>
+    </div>
+  </div>
+
   <div id="decline-modal" class="modal-backdrop hidden">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="decline-title">
       <h3 id="decline-title">Decline this estimate?</h3>
@@ -177,6 +212,7 @@ const SUPABASE_URL = "https://lewfysgyapmqlhkwxlwo.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_d5SK9L4MU1yntNHwewZSAQ_4r3pDiak";
 
 const token = new URLSearchParams(location.search).get("t");
+let estimateData = null; // last get_estimate_for_signing response
 
 async function rpc(fn, body) {
   const res = await fetch(SUPABASE_URL + "/rest/v1/rpc/" + fn, {
@@ -230,6 +266,103 @@ function renderHeader(company) {
   document.getElementById("pdf-header").style.display = "block";
 }
 
+// ---- Client portal: repair status + shared photos (read-only) ----
+const STATUS_STEPS = [
+  { key: "intake", label: "Received" },
+  { key: "in_progress", label: "In repair" },
+  { key: "waiting_parts", label: "Waiting for parts" },
+  { key: "ready", label: "Ready" },
+  { key: "delivered", label: "Delivered" },
+];
+
+function renderRepairStatus(data) {
+  document.getElementById("status-view").classList.remove("hidden");
+  renderTimeline(data.job_status);
+  renderSharedPhotos(data.shared_photos || []);
+}
+
+function renderTimeline(jobStatus) {
+  const wrap = document.getElementById("timeline-steps");
+  const note = document.getElementById("status-note");
+  wrap.innerHTML = "";
+  note.classList.add("hidden");
+
+  if (jobStatus === "cancelled") {
+    note.textContent = "This repair was cancelled. Please contact your watchmaker for details.";
+    note.classList.remove("hidden");
+    return;
+  }
+  let current = STATUS_STEPS.findIndex((s) => s.key === jobStatus);
+  if (current < 0) current = 0; // unknown status: show the earliest step, never invent one
+
+  STATUS_STEPS.forEach((s, i) => {
+    const cls = i < current ? "done" : i === current ? "current" : "todo";
+    const row = document.createElement("div");
+    row.className = "step " + cls;
+    const rail = document.createElement("div");
+    rail.className = "rail";
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dot.textContent = i < current ? "✓" : i === current ? (current + 1) : "";
+    rail.appendChild(dot);
+    const label = document.createElement("div");
+    label.className = "step-label";
+    label.textContent = s.label;
+    row.appendChild(rail);
+    row.appendChild(label);
+    wrap.appendChild(row);
+  });
+}
+
+// The job-photos bucket is private; the migration grants the anonymous
+// page read access ONLY to photos the watchmaker flagged as shared.
+// Tries a signed URL first (best for <img> caching); falls back to
+// downloading the bytes with the anon key, which the same RLS policy
+// allows.
+async function clientPhotoUrl(path) {
+  const enc = String(path).split("/").map(encodeURIComponent).join("/");
+  const headers = {
+    "apikey": SUPABASE_ANON_KEY,
+    "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+  };
+  try {
+    const res = await fetch(SUPABASE_URL + "/storage/v1/object/sign/job-photos/" + enc, {
+      method: "POST",
+      headers: Object.assign({ "Content-Type": "application/json" }, headers),
+      body: JSON.stringify({ expiresIn: 604800 }),
+    });
+    if (res.ok) {
+      const j = await res.json();
+      if (j.signedURL) return SUPABASE_URL + "/storage/v1" + j.signedURL;
+    }
+  } catch (e) { /* fall through to direct download */ }
+  const res2 = await fetch(SUPABASE_URL + "/storage/v1/object/job-photos/" + enc, { headers });
+  if (!res2.ok) return null;
+  const blob = await res2.blob();
+  return URL.createObjectURL(blob);
+}
+
+async function renderSharedPhotos(photos) {
+  const gallery = document.getElementById("photo-gallery");
+  const empty = document.getElementById("photos-empty");
+  gallery.innerHTML = "";
+  if (!photos.length) {
+    empty.classList.remove("hidden");
+    return;
+  }
+  empty.classList.add("hidden");
+  for (const ph of photos) {
+    const url = await clientPhotoUrl(ph.path);
+    if (!url) continue; // skip photos we cannot read; never break the page
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = "Repair photo";
+    img.loading = "lazy";
+    gallery.appendChild(img);
+  }
+  if (!gallery.children.length) empty.classList.remove("hidden");
+}
+
 async function init() {
   if (!token) { showError("This signing link is invalid (missing code)."); return; }
   let data;
@@ -238,10 +371,12 @@ async function init() {
   if (!data.ok) { showError("This signing link is invalid or has expired."); return; }
   document.getElementById("loading").classList.add("hidden");
   renderHeader(data.estimate.company);
+  estimateData = data;
   if (data.already_signed) {
     document.getElementById("done-view").classList.remove("hidden");
     document.getElementById("done-msg").textContent =
       "This estimate was already signed" + (data.estimate.signer_name ? " by " + data.estimate.signer_name : "") + ".";
+    renderRepairStatus(data);
     return;
   }
   if (data.already_declined) {
@@ -377,6 +512,7 @@ function setupPad() {
       document.getElementById("sign-view").classList.add("hidden");
       document.getElementById("done-view").classList.remove("hidden");
       document.getElementById("done-msg").textContent = "Thank you, " + name + ". Your signed estimate has been sent to the watchmaker.";
+      if (estimateData) renderRepairStatus(estimateData);
     } catch (e) {
       btn.disabled = false; btn.textContent = "Sign & Accept Estimate";
       errBox.textContent = e.message === "already_signed"
