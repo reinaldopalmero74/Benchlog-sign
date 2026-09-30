@@ -103,6 +103,11 @@
       <div class="notes" id="f-notes"></div>
     </div>
 
+    <div class="card" id="warranty-card" style="display:none">
+      <div class="section-h">Warranty</div>
+      <div class="notes" id="f-warranty"></div>
+    </div>
+
     <div class="card">
       <div class="section-h">Acceptance</div>
       <div class="block-label">Terms</div>
@@ -224,6 +229,7 @@ async function init() {
     r.textContent = e.reference;
   }
   if (e.notes) { document.getElementById("notes-card").style.display = "block"; document.getElementById("f-notes").textContent = e.notes; }
+  if (e.warranty) { document.getElementById("warranty-card").style.display = "block"; document.getElementById("f-warranty").textContent = e.warranty; }
 
   const tbody = document.getElementById("lines");
   let total = 0;
