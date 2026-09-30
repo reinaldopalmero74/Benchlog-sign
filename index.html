@@ -52,6 +52,18 @@
   .btn-gold { background: var(--gold); color: var(--navy); }
   .btn-gold:disabled { opacity: .5; cursor: default; }
   .btn-ghost { background: transparent; color: var(--muted); font-weight: 600; font-size: 14px; }
+  .btn-decline { background: transparent; color: #b91c1c; border: 1.5px solid #f0c6c2; font-weight: 700; font-size: 15px; }
+  .btn-decline:disabled { opacity: .5; cursor: default; }
+  .btn-danger { background: #b91c1c; color: #ffffff; }
+  .btn-danger:disabled { opacity: .5; cursor: default; }
+  textarea { width: 100%; padding: 12px; font-size: 16px; font-family: inherit; border: 1.5px solid #d1d5db; border-radius: 8px; margin-top: 6px; min-height: 84px; resize: vertical; }
+  textarea:focus { outline: none; border-color: var(--gold); }
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(10,28,56,.55); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 50; }
+  .modal { background: #ffffff; border-radius: 14px; padding: 22px; max-width: 420px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+  .modal h3 { margin: 0 0 8px; color: var(--navy); font-size: 17px; }
+  .modal p { margin: 0 0 12px; font-size: 14px; color: var(--text); }
+  .modal .row { display: flex; gap: 10px; margin-top: 14px; }
+  .modal .row .btn { margin-top: 0; }
   .error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; padding: 14px; border-radius: 10px; font-size: 14px; }
   .success { text-align: center; padding: 32px 16px; }
   .success .check { font-size: 52px; }
@@ -131,6 +143,7 @@
       </div>
       <button class="btn btn-ghost" id="clear-btn" type="button">Clear signature</button>
       <button class="btn btn-gold" id="submit-btn" type="button">Sign &amp; Accept Estimate</button>
+      <button class="btn btn-decline" id="decline-btn" type="button">Decline Estimate</button>
       <div class="error hidden" id="submit-error" style="margin-top:10px"></div>
     </div>
   </div>
@@ -138,8 +151,22 @@
   <div id="done-view" class="card hidden">
     <div class="success">
       <div class="check">✅</div>
-      <h2>Estimate signed</h2>
+      <h2 id="done-title">Estimate signed</h2>
       <p id="done-msg" style="color:var(--muted); font-size:14px"></p>
+    </div>
+  </div>
+
+  <div id="decline-modal" class="modal-backdrop hidden">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="decline-title">
+      <h3 id="decline-title">Decline this estimate?</h3>
+      <p>Are you sure you want to decline this estimate?</p>
+      <label for="decline-reason">Please tell us why (optional)</label>
+      <textarea id="decline-reason" placeholder="Optional"></textarea>
+      <div class="row">
+        <button class="btn btn-ghost" id="decline-cancel" type="button">Cancel</button>
+        <button class="btn btn-danger" id="decline-confirm" type="button">Decline Estimate</button>
+      </div>
+      <div class="error hidden" id="decline-error" style="margin-top:10px"></div>
     </div>
   </div>
 </main>
@@ -217,6 +244,12 @@ async function init() {
       "This estimate was already signed" + (data.estimate.signer_name ? " by " + data.estimate.signer_name : "") + ".";
     return;
   }
+  if (data.already_declined) {
+    document.getElementById("done-view").classList.remove("hidden");
+    document.getElementById("done-title").textContent = "Estimate declined";
+    document.getElementById("done-msg").textContent = "This estimate was already declined.";
+    return;
+  }
   const e = data.estimate;
   document.getElementById("f-number").textContent = e.number || "";
   document.getElementById("f-date").textContent = fmtDate(e.created_at);
@@ -263,6 +296,7 @@ async function init() {
 
   document.getElementById("sign-view").classList.remove("hidden");
   setupPad();
+  setupDecline();
 }
 
 // ---- Signature pad ----
@@ -348,6 +382,51 @@ function setupPad() {
       errBox.textContent = e.message === "already_signed"
         ? "This estimate was already signed."
         : "Could not submit the signature. Please try again.";
+      errBox.classList.remove("hidden");
+    }
+  });
+}
+
+// ---- Decline flow ----
+function setupDecline() {
+  const modal = document.getElementById("decline-modal");
+  const errBox = document.getElementById("decline-error");
+
+  document.getElementById("decline-btn").addEventListener("click", () => {
+    errBox.classList.add("hidden");
+    modal.classList.remove("hidden");
+  });
+
+  document.getElementById("decline-cancel").addEventListener("click", () => {
+    modal.classList.add("hidden");
+  });
+  modal.addEventListener("click", (ev) => {
+    if (ev.target === modal) modal.classList.add("hidden");
+  });
+
+  document.getElementById("decline-confirm").addEventListener("click", async () => {
+    const reason = document.getElementById("decline-reason").value.trim();
+    const btn = document.getElementById("decline-confirm");
+    errBox.classList.add("hidden");
+    btn.disabled = true; btn.textContent = "Declining…";
+    try {
+      const r = await rpc("decline_estimate_signature", {
+        p_token: token, p_reason: reason || null,
+      });
+      if (!r.ok) throw new Error(r.error || "decline_failed");
+      modal.classList.add("hidden");
+      document.getElementById("sign-view").classList.add("hidden");
+      document.getElementById("done-view").classList.remove("hidden");
+      document.getElementById("done-title").textContent = "Estimate declined";
+      document.getElementById("done-msg").textContent =
+        "Thank you. Your response has been sent to the watchmaker.";
+    } catch (e) {
+      btn.disabled = false; btn.textContent = "Decline Estimate";
+      errBox.textContent = e.message === "already_signed"
+        ? "This estimate was already signed."
+        : e.message === "already_declined"
+        ? "This estimate was already declined."
+        : "Could not decline the estimate. Please try again.";
       errBox.classList.remove("hidden");
     }
   });
