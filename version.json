@@ -1,1 +1,10 @@
-{"apkUrl":"","changes":["Desglose Labor/Parts en los estimates: cada línea se marca como labor o partes y al aceptar pasan solas al pendiente","Actualizaciones dentro de la app: aviso automático al abrir si hay versión nueva, y botón 'Buscar actualizaciones' en Account","El cliente puede rechazar el estimado desde el link, con motivo opcional","Portal del cliente: el mismo link muestra el estado de la reparación y las fotos que compartas"],"latestVersion":"1.2.0"}
+{
+  "apkUrl": "https://expo.dev/artifacts/eas/gnXFlcqBl1OcWyNIvGYuic7Y7wsNaxBi3akb7JHhpi8.apk",
+  "changes": [
+    "Desglose Labor/Parts en los estimates: cada línea se marca como labor o partes y al aceptar pasan solas al pendiente",
+    "Actualizaciones dentro de la app: aviso automático al abrir si hay versión nueva, y botón 'Buscar actualizaciones' en Account",
+    "El cliente puede rechazar el estimado desde el link, con motivo opcional",
+    "Portal del cliente: el mismo link muestra el estado de la reparación y las fotos que compartas"
+  ],
+  "latestVersion": "1.2.0"
+}
