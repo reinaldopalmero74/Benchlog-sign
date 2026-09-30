@@ -36,6 +36,8 @@
   table.services th.amount, table.services td.amount { text-align: right; white-space: nowrap; }
   table.services td { padding: 9px 12px; border-bottom: 1px solid #E3E7ED; font-size: 13px; }
   table.services tr.total td { border-bottom: none; border-top: 2px solid var(--navy); font-weight: 700; font-size: 15px; color: var(--navy); padding-top: 11px; }
+  table.services tr.subtotal td { border-bottom: none; font-size: 12px; color: #5A6472; }
+  table.services tr.subtotal td.amount { font-weight: 600; }
   .notes { font-size: 13px; white-space: pre-wrap; }
   .terms { margin: 6px 0 0; padding-left: 18px; font-size: 12.5px; color: #333; }
   .terms li { margin-bottom: 5px; }
@@ -232,14 +234,24 @@ async function init() {
   if (e.warranty) { document.getElementById("warranty-card").style.display = "block"; document.getElementById("f-warranty").textContent = e.warranty; }
 
   const tbody = document.getElementById("lines");
-  let total = 0;
+  let total = 0, labor = 0, parts = 0;
   (e.lines || []).forEach((l) => {
     // The app's lines carry no quantity — a missing qty means one unit.
     const qty = l.quantity == null ? 1 : (Number(l.quantity) || 0), price = Number(l.price) || 0;
     const amt = qty * price; total += amt;
+    // Lines without a kind count as labor (estimates made before the breakdown).
+    if (l.kind === "parts") { parts += amt; } else { labor += amt; }
     const tr = document.createElement("tr");
     tr.innerHTML = "<td></td><td class='amount'></td>";
     tr.children[0].textContent = l.description || "";
+    tr.children[1].textContent = money(amt);
+    tbody.appendChild(tr);
+  });
+  [["Labor", labor], ["Parts", parts]].forEach(([label, amt]) => {
+    const tr = document.createElement("tr");
+    tr.className = "subtotal";
+    tr.innerHTML = "<td></td><td class='amount'></td>";
+    tr.children[0].textContent = label;
     tr.children[1].textContent = money(amt);
     tbody.appendChild(tr);
   });
