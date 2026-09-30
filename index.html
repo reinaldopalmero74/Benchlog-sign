@@ -256,9 +256,23 @@ function setupPad() {
   function resize() {
     const r = canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
-    canvas.width = r.width * dpr; canvas.height = 220 * dpr;
-    ctx.scale(dpr, dpr);
+    const newW = Math.max(1, Math.round(r.width * dpr));
+    const newH = Math.max(1, Math.round(220 * dpr));
+    if (canvas.width === newW && canvas.height === newH) return;
+    // Resizing a canvas wipes its content (mobile fires resize when the
+    // keyboard opens/closes or the toolbar shows/hides on scroll), so
+    // snapshot the drawing and restore it after resizing.
+    let snapshot = null;
+    if (canvas.width > 0 && canvas.height > 0) {
+      snapshot = document.createElement("canvas");
+      snapshot.width = canvas.width;
+      snapshot.height = canvas.height;
+      snapshot.getContext("2d").drawImage(canvas, 0, 0);
+    }
+    canvas.width = newW; canvas.height = newH;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.lineWidth = 2.5; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = "#0A1C38";
+    if (snapshot) ctx.drawImage(snapshot, 0, 0, snapshot.width / dpr, snapshot.height / dpr);
   }
   resize();
   window.addEventListener("resize", () => { resize(); });
