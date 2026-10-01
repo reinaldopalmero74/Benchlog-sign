@@ -1,10 +1,1 @@
-{
-  "apkUrl": "https://expo.dev/artifacts/eas/gnXFlcqBl1OcWyNIvGYuic7Y7wsNaxBi3akb7JHhpi8.apk",
-  "changes": [
-    "Desglose Labor/Parts en los estimates: cada línea se marca como labor o partes y al aceptar pasan solas al pendiente",
-    "Actualizaciones dentro de la app: aviso automático al abrir si hay versión nueva, y botón 'Buscar actualizaciones' en Account",
-    "El cliente puede rechazar el estimado desde el link, con motivo opcional",
-    "Portal del cliente: el mismo link muestra el estado de la reparación y las fotos que compartas"
-  ],
-  "latestVersion": "1.2.0"
-}
+{"apkUrl":"https://expo.dev/artifacts/eas/4X07KqeLn6ODaiATxxn2snsZXXbgW6X0KBLkWJsWf6Q.apk","changes":["Dashboard interactivo estilo stock market: gráfica de Incoming/Completed con rangos 3M, 6M y 12M, arrastra para ver valores, tarjetas tocables","Foto de fondo del reloj más visible detrás de la marca/modelo en el detalle del trabajo"],"latestVersion":"1.2.1"}
