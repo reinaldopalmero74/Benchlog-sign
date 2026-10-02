@@ -92,6 +92,33 @@
   .gallery img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; background: #E9EDF2; display: block; }
   .hidden { display: none !important; }
   .loading { text-align: center; padding: 40px; color: var(--muted); }
+  /* Printable estimate document (download after signing) */
+  #print-doc { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; color: #0A1C38; }
+  #print-doc .pd-head { display: flex; align-items: center; gap: 14px; border-bottom: 3px solid #C9A227; padding-bottom: 12px; margin-bottom: 14px; }
+  #print-doc .pd-logo { max-height: 56px; max-width: 120px; }
+  #print-doc .pd-brand { font-size: 20px; font-weight: 800; }
+  #print-doc .pd-contact { font-size: 11px; color: #555; margin-top: 2px; }
+  #print-doc .pd-title { font-size: 16px; font-weight: 800; letter-spacing: 1px; margin: 14px 0 4px; }
+  #print-doc .pd-meta { font-size: 12px; color: #444; margin-bottom: 10px; }
+  #print-doc .pd-meta div { margin: 2px 0; }
+  #print-doc table.pd-lines { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+  #print-doc table.pd-lines th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: #667; border-bottom: 2px solid #0A1C38; padding: 6px 4px; }
+  #print-doc table.pd-lines td { border-bottom: 1px solid #E3E7ED; padding: 7px 4px; }
+  #print-doc table.pd-lines td.amount, #print-doc table.pd-lines th.amount { text-align: right; white-space: nowrap; }
+  #print-doc table.pd-lines tr.subtotal td { color: #667; }
+  #print-doc table.pd-lines tr.total td { font-weight: 800; font-size: 15px; border-bottom: none; border-top: 2px solid #0A1C38; }
+  #print-doc .pd-sec-h { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .8px; color: #0A1C38; margin: 16px 0 6px; border-bottom: 1px solid #E3E7ED; padding-bottom: 4px; }
+  #print-doc .pd-notes { font-size: 13px; white-space: pre-wrap; }
+  #print-doc .pd-sig { margin-top: 10px; }
+  #print-doc .pd-sig img { max-width: 280px; max-height: 110px; border: 1px solid #E3E7ED; border-radius: 6px; background: #fff; }
+  #print-doc .pd-photos { margin-top: 6px; }
+  #print-doc .pd-photos img { width: 100%; max-height: 320px; object-fit: contain; border-radius: 8px; margin: 8px 0; background: #F4F6F8; }
+  #print-doc .pd-foot { margin-top: 18px; font-size: 11px; color: #888; text-align: center; }
+  @media print {
+    body > *:not(#print-doc) { display: none !important; }
+    #print-doc { display: block !important; }
+    @page { margin: 14mm; }
+  }
 </style>
 </head>
 <body>
@@ -144,6 +171,11 @@
       <div class="notes" id="f-warranty"></div>
     </div>
 
+    <div class="card" id="estimate-photos-card" style="display:none">
+      <div class="section-h">Estimate photos</div>
+      <div id="estimate-photo-gallery" class="gallery"></div>
+    </div>
+
     <div class="card">
       <div class="section-h">Acceptance</div>
       <div class="block-label">Terms</div>
@@ -175,8 +207,11 @@
       <div class="check">✅</div>
       <h2 id="done-title">Estimate signed</h2>
       <p id="done-msg" style="color:var(--muted); font-size:14px"></p>
+      <button class="btn btn-gold hidden" id="download-btn" type="button" style="margin-top:14px">Download estimate (PDF)</button>
     </div>
   </div>
+
+  <div id="print-doc" style="display:none"></div>
 
   <div id="status-view" class="hidden">
     <div class="card">
@@ -213,6 +248,7 @@ const SUPABASE_ANON_KEY = "sb_publishable_d5SK9L4MU1yntNHwewZSAQ_4r3pDiak";
 
 const token = new URLSearchParams(location.search).get("t");
 let estimateData = null; // last get_estimate_for_signing response
+let sigInfo = null; // { name, date, dataUrl } — for the printable download
 
 async function rpc(fn, body) {
   const res = await fetch(SUPABASE_URL + "/rest/v1/rpc/" + fn, {
@@ -363,6 +399,102 @@ async function renderSharedPhotos(photos) {
   if (!gallery.children.length) empty.classList.remove("hidden");
 }
 
+// Photos attached to this estimate (shown inside the estimate section).
+async function renderEstimatePhotos(photos) {
+  const card = document.getElementById("estimate-photos-card");
+  const gallery = document.getElementById("estimate-photo-gallery");
+  gallery.innerHTML = "";
+  if (!photos.length) { card.style.display = "none"; return; }
+  for (const ph of photos) {
+    const url = await clientPhotoUrl(ph.path);
+    if (!url) continue; // skip photos we cannot read; never break the page
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = "Estimate photo";
+    img.loading = "lazy";
+    gallery.appendChild(img);
+  }
+  card.style.display = gallery.children.length ? "block" : "none";
+}
+
+// ---- Printable estimate: the client can download it after signing ----
+function esc(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+async function buildPrintDoc() {
+  const data = estimateData;
+  if (!data || !data.ok) return;
+  const e = data.estimate, c = e.company || {};
+  let labor = 0, parts = 0, total = 0;
+  const rows = (e.lines || []).map((l) => {
+    const qty = l.quantity == null ? 1 : (Number(l.quantity) || 0);
+    const amt = qty * (Number(l.price) || 0);
+    total += amt;
+    if (l.kind === "parts") parts += amt; else labor += amt;
+    return "<tr><td>" + esc(l.description) + "</td><td class='amount'>" + esc(money(amt)) + "</td></tr>";
+  }).join("");
+  let photoHtml = "";
+  for (const ph of (data.estimate_photos || [])) {
+    const url = await clientPhotoUrl(ph.path);
+    if (url) photoHtml += "<img src=\"" + esc(url) + "\" alt=\"Estimate photo\">";
+  }
+  const sig = sigInfo || {};
+  const contact = [c.phone, c.email, c.address].filter(Boolean).map(esc).join(" · ");
+  document.getElementById("print-doc").innerHTML =
+    "<div class='pd-head'>" +
+      (c.logo_data_uri ? "<img class='pd-logo' src=\"" + esc(c.logo_data_uri) + "\" alt=\"\">" : "") +
+      "<div><div class='pd-brand'>" + esc(c.company_name || "BenchLog") + "</div>" +
+      (contact ? "<div class='pd-contact'>" + contact + "</div>" : "") + "</div>" +
+    "</div>" +
+    "<div class='pd-title'>SERVICE ESTIMATE</div>" +
+    "<div class='pd-meta'>" +
+      "<div><strong>Estimate:</strong> " + esc(e.number) + " &nbsp;·&nbsp; <strong>Date:</strong> " + esc(fmtDate(e.created_at)) + "</div>" +
+      (e.client_name ? "<div><strong>Client:</strong> " + esc(e.client_name) + "</div>" : "") +
+      "<div><strong>Watch:</strong> " + esc(e.watch || "—") + (e.reference ? " · " + esc(e.reference) : "") + "</div>" +
+    "</div>" +
+    "<table class='pd-lines'><thead><tr><th>Description</th><th class='amount'>Amount</th></tr></thead><tbody>" +
+      rows +
+      "<tr class='subtotal'><td>Labor</td><td class='amount'>" + esc(money(labor)) + "</td></tr>" +
+      "<tr class='subtotal'><td>Parts</td><td class='amount'>" + esc(money(parts)) + "</td></tr>" +
+      "<tr class='total'><td>Total</td><td class='amount'>" + esc(money(total)) + "</td></tr>" +
+    "</tbody></table>" +
+    (e.notes ? "<div class='pd-sec-h'>Notes</div><div class='pd-notes'>" + esc(e.notes) + "</div>" : "") +
+    (e.warranty ? "<div class='pd-sec-h'>Warranty</div><div class='pd-notes'>" + esc(e.warranty) + "</div>" : "") +
+    "<div class='pd-sec-h'>Acceptance</div>" +
+    "<div class='pd-notes'>I accepted the services and prices listed in this estimate and authorized the repair work described above.</div>" +
+    "<div class='pd-sig'>" +
+      (sig.dataUrl ? "<img src=\"" + esc(sig.dataUrl) + "\" alt=\"Signature\"><br>" : "") +
+      "<div class='pd-meta'><strong>Signed by:</strong> " + esc(sig.name || e.signer_name || "") +
+      (sig.date ? " &nbsp;·&nbsp; <strong>Date:</strong> " + esc(sig.date) : "") + "</div>" +
+    "</div>" +
+    (photoHtml ? "<div class='pd-sec-h'>Estimate photos</div><div class='pd-photos'>" + photoHtml + "</div>" : "") +
+    "<div class='pd-foot'>Estimate issued by " + esc(c.company_name || e.watchmaker_name || "the watchmaker") + "</div>";
+}
+
+function setupDownload() {
+  const btn = document.getElementById("download-btn");
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    const old = btn.textContent;
+    btn.textContent = "Preparing…";
+    try {
+      await buildPrintDoc();
+      window.print();
+    } finally {
+      btn.disabled = false;
+      btn.textContent = old;
+    }
+  });
+}
+
+function showDownload(name, date, dataUrl) {
+  sigInfo = { name: name || "", date: date || "", dataUrl: dataUrl || null };
+  document.getElementById("download-btn").classList.remove("hidden");
+}
+
 async function init() {
   if (!token) { showError("This signing link is invalid (missing code)."); return; }
   let data;
@@ -372,10 +504,13 @@ async function init() {
   document.getElementById("loading").classList.add("hidden");
   renderHeader(data.estimate.company);
   estimateData = data;
+  renderEstimatePhotos(data.estimate_photos || []);
+  setupDownload();
   if (data.already_signed) {
     document.getElementById("done-view").classList.remove("hidden");
     document.getElementById("done-msg").textContent =
       "This estimate was already signed" + (data.estimate.signer_name ? " by " + data.estimate.signer_name : "") + ".";
+    showDownload(data.estimate.signer_name, fmtDate(data.estimate.signed_at), null);
     renderRepairStatus(data);
     return;
   }
@@ -512,6 +647,7 @@ function setupPad() {
       document.getElementById("sign-view").classList.add("hidden");
       document.getElementById("done-view").classList.remove("hidden");
       document.getElementById("done-msg").textContent = "Thank you, " + name + ". Your signed estimate has been sent to the watchmaker.";
+      showDownload(name, fmtDate(new Date().toISOString()), dataUrl);
       if (estimateData) renderRepairStatus(estimateData);
     } catch (e) {
       btn.disabled = false; btn.textContent = "Sign & Accept Estimate";
