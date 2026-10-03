@@ -1,1 +1,10 @@
-{"apkUrl":"https://expo.dev/artifacts/eas/4NC5QDphxXoCOrjPYaL9LLe9ba1_OA7NQ35kzkVGlJY.apk","changes":["Fotos vinculadas al estimado: aparecen en el enlace de firma y en el PDF del cliente","Descarga del estimado en PDF despues de firmar","Camara con IA (Gemini): identifica marca, modelo, referencia y serial desde una foto","Guia paso a paso en Settings para obtener la API key gratuita de Gemini","Fix: la camara con IA ya lee la foto y usa el modelo actual de Gemini"],"latestVersion":"1.2.5"}
+{
+  "latestVersion": "1.2.6",
+  "minimumVersion": "1.0.0",
+  "apkUrl": "https://expo.dev/artifacts/eas/5OnmvnfxQMS7BZcYjJtzj3Ed3ojzYZfnIwNeyq7JqJw.apk",
+  "releaseNotes": {
+    "es": "Mejora la cámara: la foto se reduce antes de enviarla (más rápido) y la app avisa si no hay respuesta en 60 segundos en vez de quedarse cargando.",
+    "en": "Camera improvement: the photo is downscaled before upload (faster) and the app reports a connection problem after 60 seconds instead of spinning forever."
+  },
+  "publishedAt": "2026-10-03T12:10:00Z"
+}
