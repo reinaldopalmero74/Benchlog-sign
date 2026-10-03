@@ -1,10 +1,10 @@
 {
-  "latestVersion": "1.2.6",
+  "latestVersion": "1.2.7",
   "minimumVersion": "1.0.0",
-  "apkUrl": "https://expo.dev/artifacts/eas/5OnmvnfxQMS7BZcYjJtzj3Ed3ojzYZfnIwNeyq7JqJw.apk",
+  "apkUrl": "https://expo.dev/artifacts/eas/rHxQ69DQiO20W3chVY1pT6mb9cQTluqlMtCN3o1rXNs.apk",
   "releaseNotes": {
-    "es": "Mejora la cámara: la foto se reduce antes de enviarla (más rápido) y la app avisa si no hay respuesta en 60 segundos en vez de quedarse cargando.",
-    "en": "Camera improvement: the photo is downscaled before upload (faster) and the app reports a connection problem after 60 seconds instead of spinning forever."
+    "es": "La cámara ya funciona: usa un modelo estable de Gemini y reintenta solo si el servicio está ocupado. Además, el botón de la cámara ahora es un botón circular flotante.",
+    "en": "Camera fixed: uses a stable Gemini model and retries automatically if the service is busy. The camera button is now a floating circular button."
   },
-  "publishedAt": "2026-10-03T12:10:00Z"
+  "publishedAt": "2026-10-03T13:05:00Z"
 }
