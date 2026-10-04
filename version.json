@@ -1,10 +1,10 @@
 {
-  "latestVersion": "1.2.9",
+  "latestVersion": "1.2.10",
   "minimumVersion": "1.0.0",
-  "apkUrl": "https://expo.dev/artifacts/eas/ZdxgfJdO_2ViayDDe1Tyd32biPLYbPZ7eK0viC_IVFc.apk",
+  "apkUrl": "https://expo.dev/artifacts/eas/-quMnU1AHD8quKiE2TIO6C87CldZExepw8K1bZWudb4.apk",
   "releaseNotes": {
-    "es": "La cámara ya no se traba al reducir la foto: si eso falla, usa la foto original y sigue.",
-    "en": "The camera no longer gets stuck downscaling the photo: it falls back to the original and continues."
+    "es": "El reconocimiento por foto ahora pasa por nuestro servidor: ya no se queda cargando.",
+    "en": "Photo recognition now runs through our server: it no longer gets stuck loading."
   },
   "publishedAt": "2026-10-04T04:40:00Z"
 }
