@@ -1,10 +1,10 @@
 {
-  "latestVersion": "1.2.8",
+  "latestVersion": "1.2.9",
   "minimumVersion": "1.0.0",
-  "apkUrl": "https://expo.dev/artifacts/eas/1msI-D0TPMEyoXz8snxfOYPpkKaacDNjccIM5yFloaI.apk",
+  "apkUrl": "https://expo.dev/artifacts/eas/ZdxgfJdO_2ViayDDe1Tyd32biPLYbPZ7eK0viC_IVFc.apk",
   "releaseNotes": {
-    "es": "La cámara ahora dice exactamente qué paso falla si algo se traba, y ningún paso puede quedarse girando para siempre.",
-    "en": "The camera now reports exactly which step fails, and no step can spin forever."
+    "es": "La cámara ya no se traba al reducir la foto: si eso falla, usa la foto original y sigue.",
+    "en": "The camera no longer gets stuck downscaling the photo: it falls back to the original and continues."
   },
-  "publishedAt": "2026-10-04T04:25:00Z"
+  "publishedAt": "2026-10-04T04:40:00Z"
 }
