@@ -1,10 +1,10 @@
 {
-  "latestVersion": "1.2.11",
+  "latestVersion": "1.2.12",
   "minimumVersion": "1.0.0",
-  "apkUrl": "https://expo.dev/artifacts/eas/RKGiBGobpFhcT9AyaFiasJ3KH97I4u0ZpdPd9_cFJyo.apk",
+  "apkUrl": "https://expo.dev/artifacts/eas/pE4veabXjSOH2OQFhuwN44UwRuhwM32mdlP1YfHtN_4.apk",
   "releaseNotes": {
-    "es": "Corrige el nombre de la funci\u00f3n del servidor para el reconocimiento por foto.",
-    "en": "Fixes the server function name for photo recognition."
+    "es": "Varias fotos por reloj, la IA sugiere servicios con precios y describe la condici\u00f3n.",
+    "en": "Multiple photos per watch; AI suggests services with prices and describes condition."
   },
   "publishedAt": "2026-10-04T04:40:00Z"
 }
