@@ -1,10 +1,1 @@
-{
-  "latestVersion": "1.2.12",
-  "minimumVersion": "1.0.0",
-  "apkUrl": "https://expo.dev/artifacts/eas/pE4veabXjSOH2OQFhuwN44UwRuhwM32mdlP1YfHtN_4.apk",
-  "releaseNotes": {
-    "es": "Varias fotos por reloj, la IA sugiere servicios con precios y describe la condici\u00f3n.",
-    "en": "Multiple photos per watch; AI suggests services with prices and describes condition."
-  },
-  "publishedAt": "2026-10-04T04:40:00Z"
-}
+{"apkUrl":"https://expo.dev/artifacts/eas/8VjtA0UuCxxQOvKEuDF7-Xw3VB_dRVhjNCROlRdyXYQ.apk","latestVersion":"1.2.13","minimumVersion":"1.0.0","publishedAt":"2026-10-06T23:10:00Z","releaseNotes":{"en":"Tactile animations, WatchCharts opens the brand page, per-client total owed, yearly parts spending, pending/paid balances, payment methods, mark paid in full, per-client history, PDF receipts, and automatic error reporting.","es":"Animaciones táctiles, WatchCharts abre la página de la marca, total adeudado por cliente, gastos anuales de partes, saldos pendientes/pagados, métodos de pago, pagado completo, historial por cliente, recibos PDF y reporte automático de errores."}}
