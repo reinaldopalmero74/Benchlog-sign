@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-en="Reinaldo Palmero — Banco del Relojero · Digital Card" data-es="Reinaldo Palmero — Banco del Relojero · Tarjeta digital">Reinaldo Palmero — Banco del Relojero · Digital Card</title>
+<meta name="description" content="Digital business card of Reinaldo Palmero, Certified Watchmaker of the 21st Century (CW21) — Banco del Relojero, Miami, FL.">
+<style>
+  :root{
+    --ivory:#FAF6EE; --ink:#16222E; --navy:#1D3247;
+    --gold:#A9852F; --gold-soft:#C6A55C; --muted:#5C6670; --line:#DDD2BA;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--ivory);color:var(--ink);font-family:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:22px 16px 30px;
+    background-image:radial-gradient(ellipse at 50% -10%,#FFFDF7 0%,var(--ivory) 55%)}
+  .lang{align-self:flex-end;display:flex;border:1px solid var(--gold);border-radius:999px;overflow:hidden}
+  .lang button{background:transparent;border:0;padding:5px 12px;font-size:.78rem;font-weight:700;letter-spacing:.08em;cursor:pointer;color:var(--navy)}
+  .lang button.on{background:var(--gold);color:#fff}
+  .card{width:100%;max-width:420px;text-align:center;margin-top:10px}
+  .mono{width:86px;height:86px;margin:8px auto 16px;border:2px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;background:#FFFDF6}
+  .mono span{font-family:Georgia,"Times New Roman",serif;font-size:1.55rem;letter-spacing:.05em;color:var(--navy)}
+  .brand{font-family:Georgia,"Times New Roman",serif;text-transform:uppercase;letter-spacing:.1em;font-size:1.32rem;font-weight:700}
+  .rule{width:60px;height:2px;background:var(--gold);margin:12px auto}
+  .name{font-size:1.12rem;color:var(--navy);font-weight:600}
+  .title{font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+  .city{margin-top:8px;font-size:.9rem;color:var(--muted)}
+  .tag{margin:16px auto 4px;max-width:340px;font-size:.95rem;color:#33414E}
+  .btns{margin-top:22px;display:flex;flex-direction:column;gap:11px}
+  .btn{display:flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;padding:15px 18px;border-radius:12px;font-weight:700;font-size:1rem;letter-spacing:.02em;border:1.5px solid var(--navy);color:var(--navy);background:#fff}
+  .btn svg{flex:none}
+  .btn.primary{background:var(--navy);color:#fff}
+  .btn.primary:hover{background:var(--gold);border-color:var(--gold)}
+  .btn.wa{background:#1FA855;border-color:#1FA855;color:#fff}
+  .btn.gold{background:var(--gold);border-color:var(--gold);color:#fff}
+  .btn:hover{border-color:var(--gold);color:var(--gold)}
+  .btn.primary:hover,.btn.wa:hover,.btn.gold:hover{color:#fff}
+  .foot{margin-top:24px;font-size:.84rem;color:var(--muted)}
+  .foot a{color:var(--gold);text-decoration:none}
+</style>
+</head>
+<body>
+
+<div class="lang" role="group" aria-label="Language">
+  <button id="btn-en" class="on" onclick="setLang('en')">EN</button>
+  <button id="btn-es" onclick="setLang('es')">ES</button>
+</div>
+
+<main class="card">
+  <div class="mono"><span>BR</span></div>
+  <p class="brand">Banco del Relojero</p>
+  <div class="rule"></div>
+  <p class="name">Reinaldo Palmero</p>
+  <p class="title" data-en="Certified Watchmaker of the 21st Century (CW21)" data-es="Relojero Certificado del Siglo XXI (CW21)">Certified Watchmaker of the 21st Century (CW21)</p>
+  <p class="city">Miami, FL</p>
+  <p class="tag" data-en="Trade watch repair for jewelry stores · Authentication · Documented estimates" data-es="Reparación trade para joyerías · Autenticación · Estimados documentados">Trade watch repair for jewelry stores · Authentication · Documented estimates</p>
+
+  <div class="btns">
+    <a class="btn wa" href="https://wa.me/[[PHONE]]" target="_blank" rel="noopener">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.4-.7-2.9-1.2-4.7-4.1-4.9-4.3-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.4 1.8 2.2 1.2 1.1 2.3 1.5 2.6 1.6.3.1.5.1.7-.1l1-1.2c.2-.3.4-.2.7-.1l2.1 1c.3.2.5.3.6.4 0 .1 0 .7-.2 1.2z"/></svg>
+      <span>WhatsApp</span>
+    </a>
+    <a class="btn primary" href="tel:[[PHONE]]">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h4l2 5-2.5 1.5a12 12 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
+      <span data-en="Call" data-es="Llamar">Call</span>
+    </a>
+    <a class="btn" href="mailto:reinaldopalmero08@yahoo.com">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+      <span data-en="Email" data-es="Correo">Email</span>
+    </a>
+    <a class="btn gold" href="contacto.vcf" download>
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="8" r="3.5"/><path d="M4 20c.6-3.4 3-5 6-5s5.4 1.6 6 5M18.5 8.5v6M15.5 11.5h6"/></svg>
+      <span data-en="Save Contact" data-es="Guardar contacto">Save Contact</span>
+    </a>
+    <a class="btn" href="index.html">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.7 2.6 4 5.6 4 9s-1.3 6.4-4 9c-2.7-2.6-4-5.6-4-9s1.3-6.4 4-9z"/></svg>
+      <span data-en="Visit website" data-es="Visitar la web">Visit website</span>
+    </a>
+  </div>
+
+  <p class="foot">@bancodelrelojero · <a href="mailto:reinaldopalmero08@yahoo.com">reinaldopalmero08@yahoo.com</a></p>
+</main>
+
+<script>
+  function setLang(lang){
+    document.querySelectorAll('[data-en]').forEach(function(el){
+      var v = el.getAttribute('data-' + lang);
+      if(v !== null){ el.textContent = v; }
+    });
+    document.documentElement.lang = lang;
+    document.getElementById('btn-en').classList.toggle('on', lang === 'en');
+    document.getElementById('btn-es').classList.toggle('on', lang === 'es');
+    try{ localStorage.setItem('bdr-lang', lang); }catch(e){}
+  }
+  (function(){
+    var saved = 'en';
+    try{ saved = localStorage.getItem('bdr-lang') || 'en'; }catch(e){}
+    if(saved === 'es'){ setLang('es'); }
+  })();
+</script>
+</body>
+</html>
