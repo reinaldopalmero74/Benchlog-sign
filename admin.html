@@ -111,6 +111,9 @@ const ERROR_TEXT = {
   bad_plan: "Ese plan no es válido.",
   bad_days: "La cantidad de días no es válida (1 a 90).",
   no_profile: "Esa cuenta ya no existe.",
+  no_customer: "Esa cuenta no tiene cliente de Stripe.",
+  no_active_subscription: "Esa cuenta no tiene una suscripción activa en Stripe.",
+  cancel_failed: "Stripe no pudo cancelar la suscripción. Inténtalo de nuevo.",
 };
 
 let allUsers = [];
@@ -256,6 +259,14 @@ function userCard(u) {
   ext.textContent = "+15 días de prueba";
   ext.addEventListener("click", () => extendTrial(u));
   actions.appendChild(ext);
+  if (u.stripe_customer_id && ["active", "trialing", "past_due"].includes(u.sub_status)) {
+    const cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.className = "chip danger";
+    cancel.textContent = "Cancelar suscripción";
+    cancel.addEventListener("click", () => cancelSubscription(u));
+    actions.appendChild(cancel);
+  }
   const reset = document.createElement("button");
   reset.type = "button";
   reset.className = "chip danger";
@@ -277,6 +288,24 @@ async function runAction(rpcName, args, successMsg) {
   } catch (e) {
     showNotice(ERROR_TEXT[e.message] || ("No se pudo completar la acción. " + e.message), false);
   }
+}
+
+async function runFunctionAction(name, body, successMsg) {
+  try {
+    const { data, error } = await sb.functions.invoke(name, { body });
+    if (error) throw new Error(error.message || "function_error");
+    if (!data || !data.ok) throw new Error((data && data.error) || "function_error");
+    await loadUsers();
+    showNotice(successMsg, true);
+  } catch (e) {
+    showNotice(ERROR_TEXT[e.message] || ("No se pudo completar la acción. " + e.message), false);
+  }
+}
+
+function cancelSubscription(u) {
+  if (!confirm("¿Cancelar la suscripción de " + u.email + " en Stripe? El cobro se detiene de inmediato y la cuenta volverá a la pantalla para elegir plan. (El botón Reiniciar cuenta NO detiene el cobro; este sí.)")) return;
+  runFunctionAction("admin-cancel-subscription", { user_id: u.id },
+    "Suscripción de " + u.email + " cancelada en Stripe.");
 }
 
 function setPlan(u, plan) {
