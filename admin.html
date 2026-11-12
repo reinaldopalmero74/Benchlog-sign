@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Panel de membresías — BenchBook</title>
+<style>
+  :root { --navy: #16283C; --navy-dark: #0A1C38; --gold: #C9A227; --bg: #eef0f3; --card: #ffffff; --text: #101418; --muted: #5A6470; --line: #E3E7ED; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.45; }
+  .topbar { background: var(--navy); padding: 18px 20px; }
+  .topbar-inner { max-width: 720px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .brand { color: var(--gold); font-size: 20px; font-weight: 700; letter-spacing: 2px; }
+  .doc-title { color: #ffffff; font-size: 14px; margin-top: 2px; }
+  main { max-width: 720px; margin: 0 auto; padding: 16px; }
+  .card { background: var(--card); border-radius: 12px; padding: 18px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .section-h { color: var(--navy); font-size: 13px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; border-bottom: 2px solid var(--gold); padding-bottom: 5px; margin: 0 0 12px; }
+  label { font-size: 13px; font-weight: 600; color: var(--navy); display: block; margin-top: 12px; }
+  input[type=email], input[type=password], input[type=search] { width: 100%; padding: 12px; font-size: 16px; border: 1.5px solid #d1d5db; border-radius: 8px; margin-top: 6px; }
+  input:focus { outline: none; border-color: var(--gold); }
+  .btn { display: block; width: 100%; padding: 14px; font-size: 16px; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; margin-top: 14px; }
+  .btn-gold { background: var(--gold); color: var(--navy); }
+  .btn-gold:disabled { opacity: .5; cursor: default; }
+  .btn-logout { background: rgba(255,255,255,.12); color: #fff; border: 1px solid rgba(255,255,255,.35); width: auto; padding: 8px 14px; font-size: 13px; font-weight: 600; border-radius: 8px; cursor: pointer; margin: 0; white-space: nowrap; }
+  .error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; padding: 12px 14px; border-radius: 10px; font-size: 14px; margin-top: 12px; }
+  .notice { padding: 12px 14px; border-radius: 10px; font-size: 14px; margin-bottom: 14px; }
+  .notice.ok { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
+  .notice.err { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
+  .hidden { display: none !important; }
+  .loading { text-align: center; padding: 40px; color: var(--muted); }
+  /* Summary */
+  .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  @media (min-width: 560px) { .summary-grid { grid-template-columns: repeat(3, 1fr); } }
+  .stat { background: var(--card); border-radius: 12px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .stat .num { font-size: 22px; font-weight: 700; color: var(--navy); }
+  .stat .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-top: 2px; }
+  /* User cards */
+  .u-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .u-email { font-size: 15px; font-weight: 700; color: var(--navy); word-break: break-all; }
+  .badge { font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; padding: 4px 9px; border-radius: 999px; white-space: nowrap; }
+  .badge.esencial { background: #e2e8f0; color: #334155; }
+  .badge.profesional { background: #dbeafe; color: #1d4ed8; }
+  .badge.maestro { background: var(--gold); color: var(--navy-dark); }
+  .u-lines { margin-top: 10px; font-size: 13px; }
+  .u-lines .row { display: flex; gap: 8px; padding: 2px 0; }
+  .u-lines .k { color: var(--muted); min-width: 92px; }
+  .warn { color: #b45309; font-weight: 600; }
+  .u-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .chip { padding: 9px 13px; font-size: 13px; font-weight: 700; border-radius: 8px; border: 1.5px solid #d1d5db; background: #fff; color: var(--navy); cursor: pointer; }
+  .chip:disabled { opacity: .45; cursor: default; }
+  .chip.current { border-color: var(--gold); background: #fdf6e0; }
+  .chip.danger { border-color: #fecaca; color: #b91c1c; }
+  .empty { text-align: center; color: var(--muted); padding: 24px 0; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <div class="brand">BenchBook</div>
+      <div class="doc-title">Panel de membresías</div>
+    </div>
+    <button class="btn-logout hidden" id="logout-btn" type="button">Cerrar sesión</button>
+  </div>
+</div>
+<main>
+  <div id="loading" class="loading">Cargando…</div>
+
+  <!-- Login -->
+  <div id="login-view" class="card hidden">
+    <div class="section-h">Acceso de administrador</div>
+    <form id="login-form">
+      <label for="login-email">Correo</label>
+      <input type="email" id="login-email" autocomplete="username" required>
+      <label for="login-password">Contraseña</label>
+      <input type="password" id="login-password" autocomplete="current-password" required>
+      <button class="btn btn-gold" id="login-btn" type="submit">Entrar</button>
+      <div class="error hidden" id="login-error"></div>
+    </form>
+  </div>
+
+  <!-- Logged in but not an admin -->
+  <div id="noaccess-view" class="card hidden">
+    <div class="section-h">Sin acceso</div>
+    <p>Esta cuenta no tiene acceso de administrador.</p>
+  </div>
+
+  <!-- Panel -->
+  <div id="panel-view" class="hidden">
+    <div class="notice hidden" id="notice"></div>
+    <div class="summary-grid" id="summary" style="margin-bottom:14px"></div>
+    <div class="card" style="padding:14px 18px">
+      <input type="search" id="search" placeholder="Buscar por correo…" style="margin-top:0">
+    </div>
+    <div id="users"></div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+// ---- Config (same project + publishable key as sign.html) ----
+const SUPABASE_URL = "https://lewfysgyapmqlhkwxlwo.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_d5SK9L4MU1yntNHwewZSAQ_4r3pDiak";
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const PRICES = { esencial: 9.99, profesional: 19.99, maestro: 34.99 };
+const PLAN_LABEL = { esencial: "Esencial", profesional: "Profesional", maestro: "Maestro" };
+const ERROR_TEXT = {
+  not_admin: "Esta cuenta no tiene acceso de administrador.",
+  bad_plan: "Ese plan no es válido.",
+  bad_days: "La cantidad de días no es válida (1 a 90).",
+  no_profile: "Esa cuenta ya no existe.",
+};
+
+let allUsers = [];
+let myEmail = "";
+let noticeTimer = null;
+
+function $(id) { return document.getElementById(id); }
+
+function fmtDate(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d)) return "";
+  return d.toLocaleDateString("es", { month: "short", day: "numeric", year: "numeric" });
+}
+
+function money(n) {
+  const v = Number(n);
+  return isNaN(v) ? "$0.00" : "$" + v.toFixed(2);
+}
+
+function show(view) {
+  ["loading", "login-view", "noaccess-view", "panel-view"].forEach((id) => {
+    $(id).classList.toggle("hidden", id !== view);
+  });
+  $("logout-btn").classList.toggle("hidden", view !== "panel-view" && view !== "noaccess-view");
+}
+
+function showNotice(text, ok) {
+  const n = $("notice");
+  n.textContent = text;
+  n.className = "notice " + (ok ? "ok" : "err");
+  if (noticeTimer) clearTimeout(noticeTimer);
+  if (ok) noticeTimer = setTimeout(() => n.classList.add("hidden"), 4000);
+}
+
+function subActive(u) {
+  return (u.sub_status === "active" || u.sub_status === "trialing") &&
+    (!u.sub_period_end || new Date(u.sub_period_end) > new Date());
+}
+
+function renderSummary() {
+  const counts = { esencial: 0, profesional: 0, maestro: 0 };
+  let active = 0, mrr = 0;
+  allUsers.forEach((u) => {
+    if (counts[u.plan] != null) counts[u.plan]++;
+    if (subActive(u)) { active++; mrr += PRICES[u.plan] || 0; }
+  });
+  const stats = [
+    [String(allUsers.length), "Cuentas"],
+    [String(counts.esencial), "Esencial"],
+    [String(counts.profesional), "Profesional"],
+    [String(counts.maestro), "Maestro"],
+    [String(active), "Suscripciones activas"],
+    [money(mrr), "Ingreso mensual estimado"],
+  ];
+  const grid = $("summary");
+  grid.innerHTML = "";
+  stats.forEach(([num, lbl]) => {
+    const d = document.createElement("div");
+    d.className = "stat";
+    const n = document.createElement("div"); n.className = "num"; n.textContent = num;
+    const l = document.createElement("div"); l.className = "lbl"; l.textContent = lbl;
+    d.appendChild(n); d.appendChild(l);
+    grid.appendChild(d);
+  });
+}
+
+function trialLine(u) {
+  if (!u.trial_ends_at) return "Sin iniciar";
+  if (u.trial_active) return "Activa hasta el " + fmtDate(u.trial_ends_at);
+  return "Vencida el " + fmtDate(u.trial_ends_at);
+}
+
+function subLine(u) {
+  if (!u.sub_status) return "Sin Stripe";
+  let s = u.sub_status;
+  if (u.sub_period_end) s += " · pagada hasta el " + fmtDate(u.sub_period_end);
+  return s;
+}
+
+function lineRow(k, v, warn) {
+  const row = document.createElement("div");
+  row.className = "row";
+  const kk = document.createElement("span"); kk.className = "k"; kk.textContent = k;
+  const vv = document.createElement("span"); vv.textContent = v;
+  if (warn) vv.className = "warn";
+  row.appendChild(kk); row.appendChild(vv);
+  return row;
+}
+
+function renderUsers() {
+  const q = $("search").value.trim().toLowerCase();
+  const list = allUsers.filter((u) => !q || (u.email || "").toLowerCase().includes(q));
+  const wrap = $("users");
+  wrap.innerHTML = "";
+  if (!list.length) {
+    const d = document.createElement("div");
+    d.className = "card empty";
+    d.textContent = q ? "Ninguna cuenta coincide con la búsqueda." : "Todavía no hay cuentas.";
+    wrap.appendChild(d);
+    return;
+  }
+  list.forEach((u) => wrap.appendChild(userCard(u)));
+}
+
+function userCard(u) {
+  const card = document.createElement("div");
+  card.className = "card";
+
+  const head = document.createElement("div");
+  head.className = "u-head";
+  const email = document.createElement("div");
+  email.className = "u-email";
+  email.textContent = u.email + (myEmail && (u.email || "").toLowerCase() === myEmail ? " · tú" : "");
+  const badge = document.createElement("span");
+  badge.className = "badge " + u.plan;
+  badge.textContent = PLAN_LABEL[u.plan] || u.plan;
+  head.appendChild(email); head.appendChild(badge);
+  card.appendChild(head);
+
+  const lines = document.createElement("div");
+  lines.className = "u-lines";
+  lines.appendChild(lineRow("Prueba", trialLine(u)));
+  lines.appendChild(lineRow("Suscripción", subLine(u)));
+  lines.appendChild(lineRow("Registrado", fmtDate(u.created_at)));
+  if (u.must_choose_plan) lines.appendChild(lineRow("Atención", "Debe elegir un plan (pantalla de pago)", true));
+  card.appendChild(lines);
+
+  const actions = document.createElement("div");
+  actions.className = "u-actions";
+  ["esencial", "profesional", "maestro"].forEach((plan) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip" + (u.plan === plan ? " current" : "");
+    b.textContent = PLAN_LABEL[plan];
+    b.disabled = u.plan === plan;
+    b.addEventListener("click", () => setPlan(u, plan));
+    actions.appendChild(b);
+  });
+  const ext = document.createElement("button");
+  ext.type = "button";
+  ext.className = "chip";
+  ext.textContent = "+15 días de prueba";
+  ext.addEventListener("click", () => extendTrial(u));
+  actions.appendChild(ext);
+  const reset = document.createElement("button");
+  reset.type = "button";
+  reset.className = "chip danger";
+  reset.textContent = "Reiniciar cuenta";
+  reset.addEventListener("click", () => resetAccount(u));
+  actions.appendChild(reset);
+  card.appendChild(actions);
+
+  return card;
+}
+
+async function runAction(rpcName, args, successMsg) {
+  try {
+    const { data, error } = await sb.rpc(rpcName, args);
+    if (error) throw new Error(error.message || "rpc_error");
+    if (!data || !data.ok) throw new Error((data && data.error) || "rpc_error");
+    await loadUsers();
+    showNotice(successMsg, true);
+  } catch (e) {
+    showNotice(ERROR_TEXT[e.message] || ("No se pudo completar la acción. " + e.message), false);
+  }
+}
+
+function setPlan(u, plan) {
+  if (!confirm("¿Cambiar la cuenta " + u.email + " al plan " + PLAN_LABEL[plan] + "?")) return;
+  runAction("admin_set_plan", { p_user: u.id, p_plan: plan },
+    "Plan de " + u.email + " cambiado a " + PLAN_LABEL[plan] + ".");
+}
+
+function extendTrial(u) {
+  runAction("admin_extend_trial", { p_user: u.id, p_days: 15 },
+    "Prueba de " + u.email + " extendida 15 días.");
+}
+
+function resetAccount(u) {
+  if (!confirm("¿Reiniciar la cuenta " + u.email + "? Volverá al plan Esencial y, si su prueba ya venció, verá la pantalla para elegir plan.")) return;
+  runAction("admin_reset_account", { p_user: u.id },
+    "Cuenta " + u.email + " reiniciada a Esencial.");
+}
+
+async function loadUsers() {
+  const { data, error } = await sb.rpc("admin_list_users");
+  if (error) {
+    showNotice("No se pudo cargar la lista de cuentas. " + error.message, false);
+    return false;
+  }
+  if (!data || !data.ok) {
+    show("noaccess-view");
+    return false;
+  }
+  allUsers = Array.isArray(data.users) ? data.users : [];
+  renderSummary();
+  renderUsers();
+  show("panel-view");
+  return true;
+}
+
+async function init() {
+  try {
+    const { data } = await sb.auth.getSession();
+    if (data && data.session) {
+      myEmail = (data.session.user.email || "").toLowerCase();
+      await loadUsers();
+      return;
+    }
+  } catch (e) { /* fall through to login */ }
+  show("login-view");
+}
+
+$("login-form").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const btn = $("login-btn");
+  const err = $("login-error");
+  err.classList.add("hidden");
+  btn.disabled = true; btn.textContent = "Entrando…";
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({
+      email: $("login-email").value.trim(),
+      password: $("login-password").value,
+    });
+    if (error) throw error;
+    myEmail = (data.user.email || "").toLowerCase();
+    await loadUsers();
+  } catch (e) {
+    err.textContent = "No se pudo entrar. Revisa el correo y la contraseña.";
+    err.classList.remove("hidden");
+  } finally {
+    btn.disabled = false; btn.textContent = "Entrar";
+  }
+});
+
+$("logout-btn").addEventListener("click", async () => {
+  try { await sb.auth.signOut(); } catch (e) { /* ignore */ }
+  allUsers = []; myEmail = "";
+  $("login-password").value = "";
+  show("login-view");
+});
+
+$("search").addEventListener("input", renderUsers);
+
+init();
+</script>
+</body>
+</html>
