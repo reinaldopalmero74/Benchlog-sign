@@ -93,6 +93,15 @@
   .gallery .tile img{width:128px;height:128px;border-radius:50%}
   .gallery .tile p{color:#F3ECDC;font-size:.92rem;line-height:1.45;margin:0}
   .gallery figcaption{margin-top:12px;font-size:.86rem;color:#5C6670}
+  @media(max-width:600px){
+    .gallery{gap:16px}
+    .gallery figure{width:150px}
+    .gallery .phone{width:150px}
+    .gallery .tile{width:150px;height:325px;padding:14px;gap:10px}
+    .gallery .tile img{width:92px;height:92px}
+    .gallery .tile p{font-size:.82rem}
+    .gallery figcaption{font-size:.78rem}
+  }
   /* Footer */
   footer{background:var(--ink);color:#E9E2D2;padding:52px 0 34px;text-align:center}
   footer .brand{color:#F3ECDC}
@@ -263,11 +272,10 @@
       <div class="sec-head">
         <p class="kicker" data-en="Content" data-es="Contenido">Content</p>
         <h2 data-en="Watchmaking, from the bench" data-es="Relojería, desde el banco">Watchmaking, from the bench</h2>
-        <p data-en="Real repairs filmed at the bench, clear guides, and how to authenticate and buy a watch without being fooled. New content every week — follow @palmerosbench." data-es="Reparaciones reales filmadas en el banco, guías claras y cómo autenticar y comprar un reloj sin que te engañen. Contenido nuevo cada semana: sigue a @palmerosbench.">Real repairs filmed at the bench, clear guides, and how to authenticate and buy a watch without being fooled. New content every week — follow @palmerosbench.</p>
+        <p data-en="Real repairs filmed at the bench, clear guides, and how to authenticate and buy a watch without being fooled. The YouTube and TikTok channels are on the way." data-es="Reparaciones reales filmadas en el banco, guías claras y cómo autenticar y comprar un reloj sin que te engañen. Los canales de YouTube y TikTok vienen en camino.">Real repairs filmed at the bench, clear guides, and how to authenticate and buy a watch without being fooled. The YouTube and TikTok channels are on the way.</p>
       </div>
       <div class="social">
-        <a class="btn ghost" href="https://www.youtube.com/@palmerosbench" target="_blank" rel="noopener">YouTube · @palmerosbench</a>
-        <a class="btn ghost" href="https://www.tiktok.com/@palmerosbench" target="_blank" rel="noopener">TikTok · @palmerosbench</a>
+        <span class="btn ghost" style="pointer-events:none" data-en="YouTube &amp; TikTok · Coming soon" data-es="YouTube y TikTok · Muy pronto">YouTube &amp; TikTok · Coming soon</span>
       </div>
     </div>
   </section>
