@@ -114,6 +114,10 @@ const ERROR_TEXT = {
   no_customer: "Esa cuenta no tiene cliente de Stripe.",
   no_active_subscription: "Esa cuenta no tiene una suscripción activa en Stripe.",
   cancel_failed: "Stripe no pudo cancelar la suscripción. Inténtalo de nuevo.",
+  cannot_delete_admin: "Las cuentas de administrador no se pueden eliminar.",
+  storage_failed: "No se pudieron borrar los archivos de esa cuenta. Inténtalo de nuevo.",
+  delete_failed: "No se pudieron borrar los datos de esa cuenta. Inténtalo de nuevo.",
+  auth_delete_failed: "No se pudo eliminar el acceso de esa cuenta. Inténtalo de nuevo.",
 };
 
 let allUsers = [];
@@ -273,6 +277,18 @@ function userCard(u) {
   reset.textContent = "Reiniciar cuenta";
   reset.addEventListener("click", () => resetAccount(u));
   actions.appendChild(reset);
+  // No delete button on the signed-in admin's own card (the only
+  // admin the list can contain); the function also refuses any
+  // admin target server-side ('cannot_delete_admin').
+  const isSelf = myEmail && (u.email || "").toLowerCase() === myEmail;
+  if (!isSelf) {
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "chip danger";
+    del.textContent = "Eliminar cuenta";
+    del.addEventListener("click", () => deleteAccount(u));
+    actions.appendChild(del);
+  }
   card.appendChild(actions);
 
   return card;
@@ -323,6 +339,12 @@ function resetAccount(u) {
   if (!confirm("¿Reiniciar la cuenta " + u.email + "? Volverá al plan Esencial y, si su prueba ya venció, verá la pantalla para elegir plan.")) return;
   runAction("admin_reset_account", { p_user: u.id },
     "Cuenta " + u.email + " reiniciada a Esencial.");
+}
+
+function deleteAccount(u) {
+  if (!confirm("¿ELIMINAR PERMANENTEMENTE la cuenta " + u.email + "?\n\nSe cancelará primero su suscripción de Stripe si tiene una activa, y después se borrarán TODOS sus datos (trabajos, clientes, fotos, pagos y ajustes) junto con su acceso. Esta acción NO se puede deshacer.")) return;
+  runFunctionAction("admin-delete-account", { user_id: u.id },
+    "Cuenta " + u.email + " eliminada por completo.");
 }
 
 async function loadUsers() {
