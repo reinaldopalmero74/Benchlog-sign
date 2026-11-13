@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Sign Estimate — BenchLog</title>
+<title>Sign Estimate — Palmero's Bench</title>
 <style>
   :root { --navy: #0A1C38; --gold: #C9A227; --bg: #eef0f3; --card: #ffffff; --text: #101418; --muted: #5A6470; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -63,7 +63,7 @@
   <table><tr>
     <td class="logo-cell" id="logo-cell" style="display:none"><img class="logo" id="co-logo" alt="Company logo"></td>
     <td>
-      <div class="brand" id="co-name">BenchLog</div>
+      <div class="brand" id="co-name">Palmero's Bench</div>
       <div id="co-contact"></div>
       <div class="doc-title">Watch Repair Estimate</div>
     </td>
@@ -195,7 +195,7 @@ function fmtDate(iso) {
 
 function renderHeader(company) {
   const c = company || {};
-  const brandName = c.company_name || c.your_name || "BenchLog";
+  const brandName = c.company_name || c.your_name || "Palmero's Bench";
   document.getElementById("co-name").textContent = brandName;
   document.title = "Sign Estimate — " + brandName;
   const contact = document.getElementById("co-contact");

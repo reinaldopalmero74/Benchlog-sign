@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Panel de membresías — BenchBook</title>
+<title>Panel de membresías — Palmero's Bench</title>
 <style>
   :root { --navy: #16283C; --navy-dark: #0A1C38; --gold: #C9A227; --bg: #eef0f3; --card: #ffffff; --text: #101418; --muted: #5A6470; --line: #E3E7ED; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -16,7 +16,7 @@
   .card { background: var(--card); border-radius: 12px; padding: 18px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
   .section-h { color: var(--navy); font-size: 13px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; border-bottom: 2px solid var(--gold); padding-bottom: 5px; margin: 0 0 12px; }
   label { font-size: 13px; font-weight: 600; color: var(--navy); display: block; margin-top: 12px; }
-  input[type=email], input[type=password], input[type=search] { width: 100%; padding: 12px; font-size: 16px; border: 1.5px solid #d1d5db; border-radius: 8px; margin-top: 6px; }
+  input[type=email], input[type=password], input[type=search], input[type=text], input[type=url], textarea { font-family: inherit; box-sizing: border-box; width: 100%; padding: 12px; font-size: 16px; border: 1.5px solid #d1d5db; border-radius: 8px; margin-top: 6px; }
   input:focus { outline: none; border-color: var(--gold); }
   .btn { display: block; width: 100%; padding: 14px; font-size: 16px; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; margin-top: 14px; }
   .btn-gold { background: var(--gold); color: var(--navy); }
@@ -57,7 +57,7 @@
 <div class="topbar">
   <div class="topbar-inner">
     <div>
-      <div class="brand">BenchBook</div>
+      <div class="brand">Palmero's Bench</div>
       <div class="doc-title">Panel de membresías</div>
     </div>
     <button class="btn-logout hidden" id="logout-btn" type="button">Cerrar sesión</button>
@@ -89,6 +89,19 @@
   <div id="panel-view" class="hidden">
     <div class="notice hidden" id="notice"></div>
     <div class="summary-grid" id="summary" style="margin-bottom:14px"></div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="section-h">Publicar actualización del app</div>
+      <p style="margin:4px 0 2px">Versión en vivo ahora: <b id="rel-current">—</b></p>
+      <label for="rel-version">Versión</label>
+      <input type="text" id="rel-version" placeholder="1.8.7">
+      <label for="rel-url">Enlace del APK (Expo)</label>
+      <input type="url" id="rel-url" placeholder="https://expo.dev/artifacts/eas/…">
+      <label for="rel-notes-en">Novedades en inglés (una por línea)</label>
+      <textarea id="rel-notes-en" rows="4"></textarea>
+      <label for="rel-notes-es">Novedades en español (una por línea)</label>
+      <textarea id="rel-notes-es" rows="4"></textarea>
+      <button class="btn btn-gold" id="rel-publish" type="button" style="margin-top:14px">Publicar actualización</button>
+    </div>
     <div class="card" style="padding:14px 18px">
       <input type="search" id="search" placeholder="Buscar por correo…" style="margin-top:0">
     </div>
@@ -406,6 +419,9 @@ $("logout-btn").addEventListener("click", async () => {
 });
 
 $("search").addEventListener("input", renderUsers);
+
+const rpBtn = document.getElementById("rel-publish");
+if (rpBtn) rpBtn.addEventListener("click", publishRelease);
 
 init();
 </script>
